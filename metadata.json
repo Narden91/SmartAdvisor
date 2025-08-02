@@ -1,0 +1,5 @@
+{
+  "name": "Smart Loan Advisor",
+  "description": "An intelligent loan and mortgage simulator that uses AI to analyze whether it's more financially advantageous to take a loan or use existing savings, considering factors like inflation and investment returns.",
+  "requestFramePermissions": []
+}
