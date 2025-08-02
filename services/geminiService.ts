@@ -2,10 +2,14 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AllLoanInputs, FinancialAdvice, FinancialProduct, LoanCalculations, PortfolioItem } from '../types';
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
+// Get API key from environment variables (supports both development and production)
+const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+
+if (!apiKey) {
+    throw new Error("Gemini API key not found. Please set VITE_GEMINI_API_KEY environment variable.");
 }
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+const ai = new GoogleGenAI({ apiKey });
 
 const responseSchema = {
     type: Type.OBJECT,
