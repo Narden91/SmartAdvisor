@@ -206,7 +206,7 @@ const App: React.FC = () => {
   // --- RENDER LOGIC ---
 
   const renderLoanCalculator = () => (
-    <div className="min-h-screen text-slate-200 font-sans p-4 sm:p-6 lg:p-8 animate-fade-in">
+    <div className="p-4 sm:p-6 lg:p-8 animate-fade-in">
       <div className="max-w-7xl mx-auto">
         <header className="flex items-center justify-between gap-4 mb-10">
           <div className="flex items-center gap-4">
@@ -280,16 +280,26 @@ const App: React.FC = () => {
 
   switch (view) {
     case 'loanCalculator':
-      return renderLoanCalculator();
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-slate-900 to-black text-slate-200 font-sans">
+          {renderLoanCalculator()}
+        </div>
+      );
     case 'salaryCalculator':
-      return <SalaryCalculator onBack={() => setView('home')} />;
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-slate-900 to-black text-slate-200 font-sans">
+          <SalaryCalculator onBack={() => setView('home')} />
+        </div>
+      );
     case 'home':
     default:
       return (
-        <HomePage
-          onNavigateToLoanCalculator={() => setView('loanCalculator')}
-          onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
-        />
+        <div className="min-h-screen bg-gradient-to-b from-slate-900 to-black text-slate-200 font-sans">
+          <HomePage
+            onNavigateToLoanCalculator={() => setView('loanCalculator')}
+            onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
+          />
+        </div>
       );
   }
 };
