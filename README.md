@@ -61,7 +61,7 @@ Your personal financial suite for making smart money moves in Italy! This app co
 
 ### Deployment
 
-This project is configured for automatic deployment to GitHub Pages. See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
+This project is configured for automatic deployment to GitHub Pages.
 
 ---
 
@@ -82,8 +82,7 @@ SmartAdvisor/
 ├── services/           # API services (Gemini AI, calculations)
 ├── .github/workflows/  # GitHub Actions for deployment
 ├── App.tsx            # Main application component
-├── types.ts           # TypeScript type definitions
-└── DEPLOYMENT.md      # Deployment guide
+└── types.ts           # TypeScript type definitions
 ```
 
 ---
