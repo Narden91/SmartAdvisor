@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
-import { AllLoanInputs, LoanCalculations, FinancialAdvice, ChartData, FinancialProduct, PortfolioItem } from './types';
+import { AllLoanInputs, LoanCalculations, FinancialAdvice, ChartData, FinancialProduct, PortfolioItem, View } from './types';
 import { getFinancialAdvice } from './services/geminiService';
 import LoanForm from './components/LoanForm';
 import ResultsDisplay from './components/ResultsDisplay';
@@ -8,6 +8,7 @@ import RecommendationCard from './components/RecommendationCard';
 import ComparisonChart from './components/ComparisonChart';
 import HomePage from './components/HomePage';
 import SalaryCalculator from './components/SalaryCalculator';
+import InvestmentAnalysis from './components/InvestmentAnalysis';
 import Footer from './components/Footer';
 import CookieBanner from './components/CookieBanner';
 import NavBar from './components/NavBar';
@@ -34,8 +35,6 @@ const initialInputs: AllLoanInputs = {
         { id: '2', name: 'Conto Deposito', amount: '5000', returnRate: '3.5' },
     ],
 };
-
-type View = 'home' | 'loanCalculator' | 'salaryCalculator';
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>('home');
@@ -285,6 +284,7 @@ const App: React.FC = () => {
         onNavigateToLoanCalculator={() => setView('loanCalculator')}
         onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
         onNavigateToHome={() => setView('home')}
+        onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
       />
     </div>
   );
@@ -298,6 +298,7 @@ const App: React.FC = () => {
             onNavigateToHome={() => setView('home')}
             onNavigateToLoanCalculator={() => setView('loanCalculator')}
             onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
+            onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
           />
           {renderLoanCalculator()}
           <CookieBanner />
@@ -311,10 +312,31 @@ const App: React.FC = () => {
             onNavigateToHome={() => setView('home')}
             onNavigateToLoanCalculator={() => setView('loanCalculator')}
             onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
+            onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
           />
           <SalaryCalculator 
             onBack={() => setView('home')} 
             onNavigateToLoanCalculator={() => setView('loanCalculator')}
+          />
+          <CookieBanner />
+        </>
+      );
+    case 'investmentAnalysis':
+      return (
+        <>
+          <NavBar
+            currentView={view}
+            onNavigateToHome={() => setView('home')}
+            onNavigateToLoanCalculator={() => setView('loanCalculator')}
+            onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
+            onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
+          />
+          <InvestmentAnalysis />
+          <Footer 
+            onNavigateToLoanCalculator={() => setView('loanCalculator')}
+            onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
+            onNavigateToHome={() => setView('home')}
+            onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
           />
           <CookieBanner />
         </>
@@ -328,10 +350,12 @@ const App: React.FC = () => {
             onNavigateToHome={() => setView('home')}
             onNavigateToLoanCalculator={() => setView('loanCalculator')}
             onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
+            onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
           />
           <HomePage
             onNavigateToLoanCalculator={() => setView('loanCalculator')}
             onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
+            onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
           />
           <CookieBanner />
         </>

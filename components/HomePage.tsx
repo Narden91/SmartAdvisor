@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { LogoIcon, CalculatorIcon, WalletIcon } from './icons';
+import { LogoIcon, CalculatorIcon, WalletIcon, TrendingUpIcon } from './icons';
 import Footer from './Footer';
 
 interface HomePageProps {
     onNavigateToLoanCalculator: () => void;
     onNavigateToSalaryCalculator: () => void;
+    onNavigateToInvestmentAnalysis: () => void;
 }
 
 const ToolCard: React.FC<{
@@ -38,7 +39,7 @@ const ToolCard: React.FC<{
     </button>
 );
 
-const HomePage: React.FC<HomePageProps> = ({ onNavigateToLoanCalculator, onNavigateToSalaryCalculator }) => {
+const HomePage: React.FC<HomePageProps> = ({ onNavigateToLoanCalculator, onNavigateToSalaryCalculator, onNavigateToInvestmentAnalysis }) => {
     return (
         <div className="min-h-screen flex flex-col pt-20">
             {/* Hero Section */}
@@ -59,7 +60,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToLoanCalculator, onNavig
             {/* Features Section */}
             <section className="section">
                 <div className="container">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                         <ToolCard
                             icon={CalculatorIcon}
                             title="Consulente Finanziario"
@@ -72,6 +73,12 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToLoanCalculator, onNavig
                             description="Calcola il tuo stipendio netto mensile partendo dalla Retribuzione Annua Lorda (RAL), aggiornato con le normative fiscali italiane 2025."
                             onClick={onNavigateToSalaryCalculator}
                         />
+                        <ToolCard
+                            icon={TrendingUpIcon}
+                            title="Analisi Investimenti"
+                            description="Simula la crescita del tuo portafoglio nel tempo e scopri il potenziale rendimento dei tuoi investimenti con diversificazione strategica."
+                            onClick={onNavigateToInvestmentAnalysis}
+                        />
                     </div>
                 </div>
             </section>
@@ -80,6 +87,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToLoanCalculator, onNavig
             <Footer 
                 onNavigateToLoanCalculator={onNavigateToLoanCalculator}
                 onNavigateToSalaryCalculator={onNavigateToSalaryCalculator}
+                onNavigateToInvestmentAnalysis={onNavigateToInvestmentAnalysis}
             />
         </div>
     );

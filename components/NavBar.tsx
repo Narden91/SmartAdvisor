@@ -1,18 +1,20 @@
 import React from 'react';
-import { LogoIcon, CalculatorIcon, WalletIcon, HomeIcon } from './icons';
+import { LogoIcon, CalculatorIcon, WalletIcon, HomeIcon, TrendingUpIcon } from './icons';
 
 interface NavBarProps {
-    currentView: 'home' | 'loanCalculator' | 'salaryCalculator';
+    currentView: 'home' | 'loanCalculator' | 'salaryCalculator' | 'investmentAnalysis';
     onNavigateToHome: () => void;
     onNavigateToLoanCalculator: () => void;
     onNavigateToSalaryCalculator: () => void;
+    onNavigateToInvestmentAnalysis: () => void;
 }
 
 const NavBar: React.FC<NavBarProps> = ({ 
     currentView, 
     onNavigateToHome, 
     onNavigateToLoanCalculator, 
-    onNavigateToSalaryCalculator 
+    onNavigateToSalaryCalculator,
+    onNavigateToInvestmentAnalysis
 }) => {
     const navItems = [
         {
@@ -26,6 +28,12 @@ const NavBar: React.FC<NavBarProps> = ({
             label: 'Calcolatore Stipendio',
             icon: WalletIcon,
             onClick: onNavigateToSalaryCalculator
+        },
+        {
+            id: 'investmentAnalysis' as const,
+            label: 'Analisi Investimenti',
+            icon: TrendingUpIcon,
+            onClick: onNavigateToInvestmentAnalysis
         }
     ];
 

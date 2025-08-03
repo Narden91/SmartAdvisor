@@ -1,6 +1,8 @@
 
 export type FinancialProduct = 'Prestito' | 'Finanziaria' | 'Mutuo';
 
+export type View = 'home' | 'loanCalculator' | 'salaryCalculator' | 'investmentAnalysis';
+
 // --- LOAN CALC INPUTS ---
 
 export interface PortfolioItem {

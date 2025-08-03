@@ -5,12 +5,14 @@ interface FooterProps {
     onNavigateToLoanCalculator?: () => void;
     onNavigateToSalaryCalculator?: () => void;
     onNavigateToHome?: () => void;
+    onNavigateToInvestmentAnalysis?: () => void;
 }
 
 const Footer: React.FC<FooterProps> = ({ 
     onNavigateToLoanCalculator, 
     onNavigateToSalaryCalculator, 
-    onNavigateToHome 
+    onNavigateToHome,
+    onNavigateToInvestmentAnalysis
 }) => {
     const currentYear = new Date().getFullYear();
 
@@ -50,9 +52,12 @@ const Footer: React.FC<FooterProps> = ({
                                 </button>
                             </li>
                             <li>
-                                <span className="body text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer">
+                                <button 
+                                    onClick={onNavigateToInvestmentAnalysis}
+                                    className="body text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer text-left"
+                                >
                                     Analisi Investimenti
-                                </span>
+                                </button>
                             </li>
                         </ul>
                     </div>
