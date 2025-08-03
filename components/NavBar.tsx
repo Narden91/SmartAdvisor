@@ -40,7 +40,7 @@ const NavBar: React.FC<NavBarProps> = ({
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50">
             <div className="container">
-                <div className="flex items-center justify-between py-4">
+                <div className="flex items-center py-4">
                     {/* Logo/Brand - Left side */}
                     <button
                         onClick={onNavigateToHome}
@@ -52,19 +52,22 @@ const NavBar: React.FC<NavBarProps> = ({
                         </span>
                     </button>
 
+                    {/* Spacer */}
+                    <div className="flex-1"></div>
+
                     {/* Navigation Items - Right side */}
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
                         {/* Home Button */}
                         <button
                             onClick={onNavigateToHome}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 ${
+                            className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 lg:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 ${
                                 currentView === 'home'
                                     ? 'bg-cyan-500 text-white shadow-cyan-500/20 shadow-lg'
                                     : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
                             }`}
                         >
                             <HomeIcon className="w-5 h-5" />
-                            <span className="body hidden sm:inline">Home</span>
+                            <span className="body hidden lg:inline">Home</span>
                         </button>
 
                         {/* Navigation Items */}
@@ -72,14 +75,14 @@ const NavBar: React.FC<NavBarProps> = ({
                             <button
                                 key={item.id}
                                 onClick={item.onClick}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 ${
+                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 lg:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 ${
                                     currentView === item.id
                                         ? 'bg-cyan-500 text-white shadow-cyan-500/20 shadow-lg'
                                         : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
                                 }`}
                             >
                                 <item.icon className="w-5 h-5" />
-                                <span className="body hidden md:inline">{item.label}</span>
+                                <span className="body hidden lg:inline">{item.label}</span>
                             </button>
                         ))}
                     </div>
