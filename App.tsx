@@ -10,6 +10,7 @@ import HomePage from './components/HomePage';
 import SalaryCalculator from './components/SalaryCalculator';
 import Footer from './components/Footer';
 import CookieBanner from './components/CookieBanner';
+import NavBar from './components/NavBar';
 import { LogoIcon, SparklesIcon, HomeIcon } from './components/icons';
 
 const initialInputs: AllLoanInputs = {
@@ -208,11 +209,11 @@ const App: React.FC = () => {
   // --- RENDER LOGIC ---
 
   const renderLoanCalculator = () => (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pt-20">
       {/* Header Section */}
       <section className="section-sm">
         <div className="container">
-          <header className="flex items-center justify-between gap-4 animate-fade-in">
+          <header className="flex items-center gap-4 animate-fade-in">
             <div className="flex items-center gap-4">
               <LogoIcon className="w-14 h-14 text-cyan-400" />
               <div>
@@ -220,13 +221,6 @@ const App: React.FC = () => {
                 <p className="body text-slate-400 mt-1">Analisi intelligenti per le tue decisioni finanziarie</p>
               </div>
             </div>
-            <button
-              onClick={() => setView('home')}
-              className="flex items-center gap-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 text-slate-300 font-medium py-2 px-4 rounded-lg transition-colors"
-            >
-              <HomeIcon className="w-5 h-5" />
-              <span className="body">Home</span>
-            </button>
           </header>
         </div>
       </section>
@@ -299,6 +293,12 @@ const App: React.FC = () => {
     case 'loanCalculator':
       return (
         <>
+          <NavBar
+            currentView={view}
+            onNavigateToHome={() => setView('home')}
+            onNavigateToLoanCalculator={() => setView('loanCalculator')}
+            onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
+          />
           {renderLoanCalculator()}
           <CookieBanner />
         </>
@@ -306,6 +306,12 @@ const App: React.FC = () => {
     case 'salaryCalculator':
       return (
         <>
+          <NavBar
+            currentView={view}
+            onNavigateToHome={() => setView('home')}
+            onNavigateToLoanCalculator={() => setView('loanCalculator')}
+            onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
+          />
           <SalaryCalculator 
             onBack={() => setView('home')} 
             onNavigateToLoanCalculator={() => setView('loanCalculator')}
@@ -317,6 +323,12 @@ const App: React.FC = () => {
     default:
       return (
         <>
+          <NavBar
+            currentView={view}
+            onNavigateToHome={() => setView('home')}
+            onNavigateToLoanCalculator={() => setView('loanCalculator')}
+            onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
+          />
           <HomePage
             onNavigateToLoanCalculator={() => setView('loanCalculator')}
             onNavigateToSalaryCalculator={() => setView('salaryCalculator')}

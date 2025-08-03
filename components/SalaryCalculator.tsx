@@ -64,11 +64,11 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
     };
     
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col pt-20">
             {/* Header Section */}
             <section className="section-sm">
                 <div className="container">
-                    <header className="flex items-center justify-between gap-4 animate-fade-in">
+                    <header className="flex items-center gap-4 animate-fade-in">
                         <div className="flex items-center gap-4">
                             <WalletIcon className="w-14 h-14 text-cyan-400" />
                             <div>
@@ -76,13 +76,6 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
                                 <p className="body text-slate-400 mt-1">Dal Lordo al Netto con le regole 2025</p>
                             </div>
                         </div>
-                        <button
-                            onClick={onBack}
-                            className="flex items-center gap-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 text-slate-300 font-medium py-2 px-4 rounded-lg transition-colors"
-                        >
-                            <HomeIcon className="w-5 h-5" />
-                            <span className="body">Home</span>
-                        </button>
                     </header>
                 </div>
             </section>

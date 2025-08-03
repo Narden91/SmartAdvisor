@@ -40,7 +40,7 @@ const ToolCard: React.FC<{
 
 const HomePage: React.FC<HomePageProps> = ({ onNavigateToLoanCalculator, onNavigateToSalaryCalculator }) => {
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col pt-20">
             {/* Hero Section */}
             <section className="section-lg flex items-center justify-center">
                 <div className="container">
