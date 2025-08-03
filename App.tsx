@@ -8,6 +8,8 @@ import RecommendationCard from './components/RecommendationCard';
 import ComparisonChart from './components/ComparisonChart';
 import HomePage from './components/HomePage';
 import SalaryCalculator from './components/SalaryCalculator';
+import Footer from './components/Footer';
+import CookieBanner from './components/CookieBanner';
 import { LogoIcon, SparklesIcon, HomeIcon } from './components/icons';
 
 const initialInputs: AllLoanInputs = {
@@ -206,100 +208,121 @@ const App: React.FC = () => {
   // --- RENDER LOGIC ---
 
   const renderLoanCalculator = () => (
-    <div className="p-4 sm:p-6 lg:p-8 animate-fade-in">
-      <div className="max-w-7xl mx-auto">
-        <header className="flex items-center justify-between gap-4 mb-10">
-          <div className="flex items-center gap-4">
-            <LogoIcon className="w-14 h-14 text-cyan-400" />
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Consulente Finanziario AI</h1>
-              <p className="text-slate-400 mt-1 text-base">Analisi intelligenti per le tue decisioni finanziarie</p>
+    <div className="min-h-screen flex flex-col">
+      {/* Header Section */}
+      <section className="section-sm">
+        <div className="container">
+          <header className="flex items-center justify-between gap-4 animate-fade-in">
+            <div className="flex items-center gap-4">
+              <LogoIcon className="w-14 h-14 text-cyan-400" />
+              <div>
+                <h1 className="heading-h1 text-white">Consulente Finanziario AI</h1>
+                <p className="body text-slate-400 mt-1">Analisi intelligenti per le tue decisioni finanziarie</p>
+              </div>
             </div>
-          </div>
-          <button
-            onClick={() => setView('home')}
-            className="flex items-center gap-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 text-slate-300 font-medium py-2 px-4 rounded-lg transition-colors"
-          >
-            <HomeIcon className="w-5 h-5" />
-            <span>Home</span>
-          </button>
-        </header>
+            <button
+              onClick={() => setView('home')}
+              className="flex items-center gap-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 text-slate-300 font-medium py-2 px-4 rounded-lg transition-colors"
+            >
+              <HomeIcon className="w-5 h-5" />
+              <span className="body">Home</span>
+            </button>
+          </header>
+        </div>
+      </section>
 
-        <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
-            <LoanForm
-              inputs={inputs}
-              product={product}
-              onProductChange={handleProductChange}
-              onInputChange={handleInputChange}
-              onPortfolioChange={handlePortfolioChange}
-              onAddPortfolioItem={addPortfolioItem}
-              onRemovePortfolioItem={removePortfolioItem}
-              onAnalyze={handleAnalysis}
-              isLoading={isLoading}
-            />
-          </div>
-          <div className="lg:col-span-2 space-y-8">
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-300 p-4 rounded-xl">
-                <p className="font-bold">Errore di Analisi</p>
-                <p>{error}</p>
-              </div>
-            )}
-            {isLoading && !calculations && (
-                 <div className="flex justify-center items-center h-96 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700">
-                    <div className="text-center">
-                        <svg className="animate-spin h-10 w-10 text-cyan-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <p className="mt-4 text-lg font-medium text-slate-300">Sto analizzando il tuo futuro finanziario...</p>
-                        <p className="text-slate-400">L'IA sta elaborando i dati.</p>
-                    </div>
+      {/* Main Content Section */}
+      <section className="section flex-1">
+        <div className="container">
+          <main className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-slide-up">
+            <div className="lg:col-span-1">
+              <LoanForm
+                inputs={inputs}
+                product={product}
+                onProductChange={handleProductChange}
+                onInputChange={handleInputChange}
+                onPortfolioChange={handlePortfolioChange}
+                onAddPortfolioItem={addPortfolioItem}
+                onRemovePortfolioItem={removePortfolioItem}
+                onAnalyze={handleAnalysis}
+                isLoading={isLoading}
+              />
+            </div>
+            <div className="lg:col-span-2 space-y-8">
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/30 text-red-300 p-4 rounded-xl">
+                  <p className="heading-h3 text-lg">Errore di Analisi</p>
+                  <p className="body">{error}</p>
                 </div>
-            )}
-            {(calculations || advice) && !error && (
-              <div className="space-y-8">
-                <ResultsDisplay calculations={calculations} product={product} inputs={inputs} />
-                <RecommendationCard advice={advice} isLoading={isLoading && !advice} />
-                {chartData.length > 0 && <ComparisonChart data={chartData} />}
-              </div>
-            )}
-            {!isLoading && !calculations && !error && (
-                <div className="flex flex-col justify-center items-center h-96 bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 text-center border-2 border-dashed border-slate-700">
-                    <SparklesIcon className="w-16 h-16 text-cyan-500/50 mb-4" />
-                    <h2 className="text-2xl font-bold text-white">Pronto per la tua analisi?</h2>
-                    <p className="mt-2 max-w-sm text-slate-400">Compila i tuoi dati e clicca "Analizza" per ricevere la tua consulenza finanziaria personalizzata dall'IA.</p>
+              )}
+              {isLoading && !calculations && (
+                   <div className="flex justify-center items-center h-96 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700">
+                      <div className="text-center">
+                          <svg className="animate-spin h-10 w-10 text-cyan-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <p className="body-lg mt-4 font-medium text-slate-300">Sto analizzando il tuo futuro finanziario...</p>
+                          <p className="body text-slate-400">L'IA sta elaborando i dati.</p>
+                      </div>
+                  </div>
+              )}
+              {(calculations || advice) && !error && (
+                <div className="space-y-8">
+                  <ResultsDisplay calculations={calculations} product={product} inputs={inputs} />
+                  <RecommendationCard advice={advice} isLoading={isLoading && !advice} />
+                  {chartData.length > 0 && <ComparisonChart data={chartData} />}
                 </div>
-            )}
-          </div>
-        </main>
-      </div>
+              )}
+              {!isLoading && !calculations && !error && (
+                  <div className="flex flex-col justify-center items-center h-96 bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 text-center border-2 border-dashed border-slate-700">
+                      <SparklesIcon className="w-16 h-16 text-cyan-500/50 mb-4" />
+                      <h2 className="heading-h2 text-white">Pronto per la tua analisi?</h2>
+                      <p className="body mt-2 max-w-sm text-slate-400">Compila i tuoi dati e clicca "Analizza" per ricevere la tua consulenza finanziaria personalizzata dall'IA.</p>
+                  </div>
+              )}
+            </div>
+          </main>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <Footer 
+        onNavigateToLoanCalculator={() => setView('loanCalculator')}
+        onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
+        onNavigateToHome={() => setView('home')}
+      />
     </div>
   );
 
   switch (view) {
     case 'loanCalculator':
       return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-900 to-black text-slate-200 font-sans">
+        <>
           {renderLoanCalculator()}
-        </div>
+          <CookieBanner />
+        </>
       );
     case 'salaryCalculator':
       return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-900 to-black text-slate-200 font-sans">
-          <SalaryCalculator onBack={() => setView('home')} />
-        </div>
+        <>
+          <SalaryCalculator 
+            onBack={() => setView('home')} 
+            onNavigateToLoanCalculator={() => setView('loanCalculator')}
+          />
+          <CookieBanner />
+        </>
       );
     case 'home':
     default:
       return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-900 to-black text-slate-200 font-sans">
+        <>
           <HomePage
             onNavigateToLoanCalculator={() => setView('loanCalculator')}
             onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
           />
-        </div>
+          <CookieBanner />
+        </>
       );
   }
 };

@@ -58,24 +58,24 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({ advice, isLoadi
     <div className="bg-slate-800/60 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-slate-700/80">
       <div className="flex items-center gap-3 mb-5">
         <SparklesIcon className="w-7 h-7 text-cyan-400" />
-        <h2 className="text-xl font-bold text-white">Consiglio dell'IA</h2>
+        <h2 className="heading-h2 text-white">Consiglio dell'IA</h2>
       </div>
       
       <div className={`p-4 rounded-xl border ${bgClasses} mb-5`}>
         <div className="flex items-center gap-4">
             <Icon className={`w-10 h-10 ${colorClasses}`} />
             <div>
-                <p className={`text-lg font-bold ${colorClasses}`}>
+                <p className={`body-lg font-bold ${colorClasses}`}>
                 {text}
                 </p>
-                <p className="text-slate-300 text-sm mt-1">{advice.summary}</p>
+                <p className="body text-slate-300 mt-1">{advice.summary}</p>
             </div>
         </div>
       </div>
 
       <div>
-        <h3 className="font-semibold text-white mb-2">Analisi Dettagliata</h3>
-        <p className="text-slate-300 leading-relaxed text-base">{advice.detailedAnalysis}</p>
+        <h3 className="heading-h3 text-white mb-2">Analisi Dettagliata</h3>
+        <p className="body text-slate-300 leading-relaxed">{advice.detailedAnalysis}</p>
       </div>
     </div>
   );

@@ -1,15 +1,148 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Global styles for Smart Loan Advisor */
+/* ======================================
+   DESIGN TOKENS SYSTEM
+   ====================================== */
+   
+:root {
+  /* Typography - Google Fonts: Inter */
+  --font-family-sans: 'Inter', sans-serif;
+  
+  /* Font Sizes - Responsive Scale */
+  --text-display: 72px;  /* Hero headings */
+  --text-h1: 48px;       /* Main headings */
+  --text-h2: 36px;       /* Section headings */
+  --text-h3: 24px;       /* Subsection headings */
+  --text-body-lg: 18px;  /* Large body text */
+  --text-body: 16px;     /* Standard body text */
+  --text-body-sm: 14px;  /* Small body text */
+  
+  /* Letter Spacing - Typography Rhythm */
+  --tracking-heading: 0.1em;  /* Headings → Inter Black, uppercase */
+  --tracking-body: 0.02em;    /* Body → Inter Regular */
+  
+  /* Layout System - Container & Spacing */
+  --max-width-container: 1180px;    /* Max content width */
+  --padding-container-x: 24px;      /* Horizontal container padding */
+  --spacing-section-sm: 80px;       /* Small section padding */
+  --spacing-section: 100px;         /* Standard section padding */
+  --spacing-section-lg: 120px;      /* Large section padding */
+  
+  /* Color Palette */
+  --color-primary: #22d3ee;
+  --color-primary-dark: #0891b2;
+  --color-secondary: #34d399;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  
+  /* Interactive States */
+  --transition-default: all 0.2s ease-in-out;
+}
+
+/* ======================================
+   GLOBAL STYLES
+   ====================================== */
+
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-family-sans);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  min-height: 100vh;
 }
 
-/* Custom styles that complement Tailwind */
+/* ======================================
+   TYPOGRAPHY SYSTEM
+   Inter Black → Headings (uppercase, 0.1em tracking)
+   Inter Regular → Body (0.02em tracking)
+   ====================================== */
+.heading-display {
+  font-size: var(--text-display);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: var(--tracking-heading);
+  text-transform: uppercase;
+}
+
+.heading-h1 {
+  font-size: var(--text-h1);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: var(--tracking-heading);
+  text-transform: uppercase;
+}
+
+.heading-h2 {
+  font-size: var(--text-h2);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: var(--tracking-heading);
+  text-transform: uppercase;
+}
+
+.heading-h3 {
+  font-size: var(--text-h3);
+  font-weight: 900;
+  line-height: 1.3;
+  letter-spacing: var(--tracking-heading);
+  text-transform: uppercase;
+}
+
+.body-lg {
+  font-size: var(--text-body-lg);
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: var(--tracking-body);
+}
+
+.body {
+  font-size: var(--text-body);
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: var(--tracking-body);
+}
+
+.body-sm {
+  font-size: var(--text-body-sm);
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: var(--tracking-body);
+}
+
+/* ======================================
+   LAYOUT SYSTEM
+   Max-width: 1180px centered, 24px padding
+   Section padding: 80px-120px vertical
+   ====================================== */
+
+.container {
+  max-width: var(--max-width-container);
+  margin: 0 auto;
+  padding-left: var(--padding-container-x);
+  padding-right: var(--padding-container-x);
+}
+
+.section {
+  padding-top: var(--spacing-section);
+  padding-bottom: var(--spacing-section);
+}
+
+.section-sm {
+  padding-top: var(--spacing-section-sm);
+  padding-bottom: var(--spacing-section-sm);
+}
+
+.section-lg {
+  padding-top: var(--spacing-section-lg);
+  padding-bottom: var(--spacing-section-lg);
+}
+
+/* ======================================
+   UTILITY CLASSES
+   ====================================== */
 .glass-effect {
   backdrop-filter: blur(10px);
   background: rgba(255, 255, 255, 0.1);
@@ -18,7 +151,7 @@ body {
 
 /* Smooth transitions */
 * {
-  transition: all 0.2s ease-in-out;
+  transition: var(--transition-default);
 }
 
 /* Custom scrollbar */
@@ -38,4 +171,38 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
+}
+
+/* ======================================
+   ANIMATION SYSTEM
+   ====================================== */
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  0% { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes slideUp {
+  0% { 
+    opacity: 0; 
+    transform: translateY(40px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
