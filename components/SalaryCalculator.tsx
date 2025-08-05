@@ -118,7 +118,10 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
                                     <div>
                                         <label htmlFor="regione" className="body-sm block font-medium text-slate-300 mb-1.5">Regione Residenza</label>
                                         <select id="regione" name="regione" value={inputs.regione} onChange={handleInputChange} className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                                            </select>
+                                            {regioni.map(regione => (
+                                                <option key={regione} value={regione}>{regione}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div>
                                         <label htmlFor="addizionaleComunale" className="body-sm block font-medium text-slate-300 mb-1.5">Add. Comunale</label>
