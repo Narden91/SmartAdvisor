@@ -34,6 +34,19 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Info tooltip component (compact, above icon, non-occluding)
+    const InfoIcon: React.FC<{ text: string }> = ({ text }) => (
+        <span className="group relative inline-block align-middle ml-2">
+            <svg className="w-4 h-4 text-cyan-400 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                <text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text>
+            </svg>
+            <span className="absolute left-1/2 -translate-x-1/2 -top-9 z-20 hidden group-hover:block bg-slate-900 text-slate-200 text-xs rounded-md px-2 py-1 shadow-lg border border-slate-700 w-max max-w-[220px] whitespace-pre-line text-center leading-tight">
+                {text}
+            </span>
+        </span>
+    );
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setInputs(prev => ({ ...prev, [name]: value }));
@@ -89,7 +102,9 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
                                 <h2 className="heading-h2 text-white">I Tuoi Dati</h2>
                                 
                                 <div>
-                                    <label htmlFor="ral" className="body-sm block font-medium text-slate-300 mb-1.5">Retribuzione Annua Lorda (RAL)</label>
+                                    <label htmlFor="ral" className="body-sm font-medium text-slate-300 mb-1.5 flex items-center">Retribuzione Annua Lorda (RAL)
+                                        <InfoIcon text="La RAL è il totale lordo annuo del tuo stipendio, prima di tasse e contributi." />
+                                    </label>
                                     <div className="relative">
                                         <input type="number" id="ral" name="ral" value={inputs.ral} onChange={handleInputChange} className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2.5 px-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500" required />
                                         <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">€</span>
@@ -97,7 +112,9 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
                                 </div>
 
                                  <div>
-                                    <label htmlFor="mensilita" className="body-sm block font-medium text-slate-300 mb-1.5">Numero Mensilità</label>
+                                    <label htmlFor="mensilita" className="body-sm font-medium text-slate-300 mb-1.5 flex items-center">Numero Mensilità
+                                        <InfoIcon text="Indica quante mensilità ricevi all'anno (es. 13 include tredicesima, 14 anche quattordicesima)." />
+                                    </label>
                                     <select id="mensilita" name="mensilita" value={inputs.mensilita} onChange={handleInputChange} className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
                                         <option value="12">12</option>
                                         <option value="13">13</option>
@@ -106,7 +123,9 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
                                 </div>
 
                                  <div>
-                                    <label htmlFor="contractType" className="body-sm block font-medium text-slate-300 mb-1.5">Tipo di Contratto</label>
+                                    <label htmlFor="contractType" className="body-sm font-medium text-slate-300 mb-1.5 flex items-center">Tipo di Contratto
+                                        <InfoIcon text="Seleziona la tipologia del tuo contratto di lavoro: indeterminato, determinato o apprendistato." />
+                                    </label>
                                     <select id="contractType" name="contractType" value={inputs.contractType} onChange={handleInputChange} className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
                                         <option value="indeterminato">Tempo Indeterminato</option>
                                         <option value="determinato">Tempo Determinato</option>
@@ -116,7 +135,9 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
                                 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="regione" className="body-sm block font-medium text-slate-300 mb-1.5">Regione Residenza</label>
+                                        <label htmlFor="regione" className="body-sm font-medium text-slate-300 mb-1.5 flex items-center">Regione Residenza
+                                            <InfoIcon text="Seleziona la regione italiana in cui risiedi fiscalmente. Influisce sulle addizionali regionali." />
+                                        </label>
                                         <select id="regione" name="regione" value={inputs.regione} onChange={handleInputChange} className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
                                             {regioni.map(regione => (
                                                 <option key={regione} value={regione}>{regione}</option>
@@ -124,7 +145,9 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
                                         </select>
                                     </div>
                                     <div>
-                                        <label htmlFor="addizionaleComunale" className="body-sm block font-medium text-slate-300 mb-1.5">Add. Comunale</label>
+                                        <label htmlFor="addizionaleComunale" className="body-sm font-medium text-slate-300 mb-1.5 flex items-center">Add. Comunale
+                                            <InfoIcon text="Percentuale dell'addizionale comunale applicata dal tuo comune di residenza." />
+                                        </label>
                                         <div className="relative">
                                         <input type="number" step="0.1" id="addizionaleComunale" name="addizionaleComunale" value={inputs.addizionaleComunale} onChange={handleInputChange} className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2.5 px-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500" />
                                          <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">%</span>
@@ -134,11 +157,15 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
 
                                  <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="figliACarico" className="body-sm block font-medium text-slate-300 mb-1.5">Figli a Carico (&lt;21)</label>
+                                        <label htmlFor="figliACarico" className="body-sm font-medium text-slate-300 mb-1.5 flex items-center">Figli a Carico {'(<21)'}
+                                            <InfoIcon text="Numero di figli fiscalmente a carico con meno di 21 anni." />
+                                        </label>
                                         <input type="number" id="figliACarico" name="figliACarico" min="0" value={inputs.figliACarico} onChange={handleInputChange} className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2.5 px-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500" />
                                     </div>
                                     <div>
-                                         <label htmlFor="altriFamiliariACarico" className="body-sm block font-medium text-slate-300 mb-1.5">Altri Familiari</label>
+                                         <label htmlFor="altriFamiliariACarico" className="body-sm font-medium text-slate-300 mb-1.5 flex items-center">Altri Familiari
+                                            <InfoIcon text="Numero di altri familiari fiscalmente a carico (es. coniuge, genitori)." />
+                                         </label>
                                          <input type="number" id="altriFamiliariACarico" name="altriFamiliariACarico" min="0" value={inputs.altriFamiliariACarico} onChange={handleInputChange} className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2.5 px-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500" />
                                     </div>
                                 </div>
