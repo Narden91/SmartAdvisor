@@ -186,7 +186,7 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = () => {
                         <div className="lg:col-span-1">
                             <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-slate-700/80 sticky top-28">
                                 <div className="flex items-center gap-3 mb-6">
-                                    <TrendingUpIcon className="w-6 h-6 text-cyan-400" />
+                                    {/* <TrendingUpIcon className="w-6 h-6 text-cyan-400" /> */}
                                     <h2 className="heading-h2 text-white">Parametri di Analisi</h2>
                                 </div>
                                 

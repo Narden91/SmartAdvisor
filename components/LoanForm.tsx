@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { AllLoanInputs, FinancialProduct, PortfolioItem } from '../types';
-import { PrestitoIcon, FinanziariaIcon, MutuoIcon, SparklesIcon, PlusCircleIcon, TrashIcon } from './icons';
+import { PrestitoIcon, FinanziariaIcon, MutuoIcon, SparklesIcon, PlusCircleIcon, TrashIcon, InfoIcon } from './icons';
 
 interface LoanFormProps {
   inputs: AllLoanInputs;
@@ -15,24 +15,84 @@ interface LoanFormProps {
   isLoading: boolean;
 }
 
-const InputField: React.FC<{ label: string; name: keyof AllLoanInputs; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; type?: 'text' | 'number'; adornment?: string, placeholder?: string }> = ({ label, name, value, onChange, type = "text", adornment, placeholder }) => (
-  <div>
-    <label htmlFor={name} className="block text-sm font-medium text-slate-300 mb-1.5">{label}</label>
-    <div className="relative">
-      <input
-        type={type}
-        inputMode="decimal"
-        id={name}
-        name={name}
-        value={value}
-        onChange={onChange}
-        className="w-full bg-slate-700/50 border border-slate-600 rounded-lg shadow-sm py-2.5 px-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition"
-        placeholder={placeholder || (adornment === '€' ? 'es. 15000' : 'es. 5')}
-      />
-      {adornment && <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">{adornment}</span>}
-    </div>
-  </div>
+const fieldTooltips: Record<keyof AllLoanInputs, string> = {
+  capitale: "L'importo che desideri richiedere in prestito. Considera attentamente le tue esigenze reali per evitare di indebitarti oltre il necessario.",
+  tan: "Tasso Annuo Nominale: il tasso di interesse puro applicato al prestito, senza considerare le spese accessorie. Confronta sempre i TAN di diverse offerte.",
+  durataMesi: "Il periodo di rimborso del prestito in mesi. Durate più lunghe comportano rate più basse ma interessi totali maggiori.",
+  speseIstruttoria: "Costi una tantum per l'analisi della pratica e l'apertura del finanziamento. Spesso sono negoziabili.",
+  costiAssicurativi: "Costi per eventuali assicurazioni collegate al prestito (es. vita, infortuni). Verifica se sono obbligatorie o facoltative.",
+  speseIncassoRata: "Commissione applicata per ogni rata pagata, spesso per bonifici automatici. Può incidere significativamente sul costo totale.",
+  premioAssicurativo: "Premio mensile per l'assicurazione sulla cessione del quinto. Include generalmente copertura vita e perdita impiego.",
+  commissioniIntermediazione: "Commissioni pagate all'intermediario finanziario per la gestione della pratica. Spesso sono negoziabili.",
+  speseGestionePratica: "Costi amministrativi per la gestione del finanziamento. Verifica cosa includono esattamente.",
+  spread: "Margine applicato dalla banca al tasso di riferimento. È la parte negoziabile del tasso finale del mutuo.",
+  parametroRiferimento: "Tasso di riferimento del mercato (es. Euribor, IRS). Varia nel tempo e influenza la rata nei mutui a tasso variabile.",
+  costiNotarili: "Spese per il notaio obbligatorie per l'atto di mutuo. Include imposte, onorari notarili e visure catastali.",
+  assicurazioneObbligatoria: "Assicurazione incendio e scoppio obbligatoria per legge sui mutui. Il costo varia in base al valore dell'immobile.",
+  impostaSostitutiva: "Tassa statale pari allo 0,25% del capitale finanziato per i mutui prima casa, 2% per altri immobili.",
+  liquidSavings: "I tuoi risparmi immediatamente disponibili in conti correnti o depositi. Non include investimenti che richiedono vendita.",
+  portfolio: "Dettagli sui tuoi investimenti attuali. Importante per valutare se conviene usare i risparmi o richiedere un finanziamento."
+};
+
+const portfolioTooltips = {
+  name: "Il nome dell'investimento o strumento finanziario (es. ETF, azioni, obbligazioni, fondi comuni).",
+  amount: "L'importo attualmente investito in questo strumento. Usa il valore di mercato corrente, non quello di acquisto.",
+  returnRate: "Il rendimento annuo atteso o storico di questo investimento. Considera rendimenti realistici basati su dati storici."
+};
+
+// Info tooltip component (compact, above icon, non-occluding) - consistent with SalaryCalculator
+const InfoTooltip: React.FC<{ text: string }> = ({ text }) => (
+  <span className="group relative inline-block align-middle ml-2">
+    <svg className="w-4 h-4 text-cyan-400 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <circle cx="12" cy="12" r="10" strokeWidth="2" />
+      <text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text>
+    </svg>
+    <span className="absolute left-1/2 -translate-x-1/2 -top-9 z-20 hidden group-hover:block bg-slate-900 text-slate-200 text-xs rounded-md px-2 py-1 shadow-lg border border-slate-700 w-max max-w-[220px] whitespace-pre-line text-center leading-tight">
+      {text}
+    </span>
+  </span>
 );
+
+const PortfolioTooltip: React.FC<{ type: keyof typeof portfolioTooltips; children: React.ReactNode }> = ({ type, children }) => {
+  return (
+    <div className="flex items-center gap-2">
+      {children}
+      <InfoTooltip text={portfolioTooltips[type]} />
+    </div>
+  );
+};
+
+const InputField: React.FC<{ 
+  label: string; 
+  name: keyof AllLoanInputs; 
+  value: string; 
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
+  type?: 'text' | 'number'; 
+  adornment?: string; 
+  placeholder?: string 
+}> = ({ label, name, value, onChange, type = "text", adornment, placeholder }) => {
+  return (
+    <div>
+      <div className="flex items-center mb-1.5">
+        <label htmlFor={name} className="block text-sm font-medium text-slate-300">{label}</label>
+        <InfoTooltip text={fieldTooltips[name]} />
+      </div>
+      <div className="relative">
+        <input
+          type={type}
+          inputMode="decimal"
+          id={name}
+          name={name}
+          value={value}
+          onChange={onChange}
+          className="w-full bg-slate-700/50 border border-slate-600 rounded-lg shadow-sm py-2.5 px-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition"
+          placeholder={placeholder || (adornment === '€' ? 'es. 15000' : 'es. 5')}
+        />
+        {adornment && <span className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">{adornment}</span>}
+      </div>
+    </div>
+  );
+};
 
 const LoanForm: React.FC<LoanFormProps> = ({ inputs, product, onProductChange, onInputChange, onPortfolioChange, onAddPortfolioItem, onRemovePortfolioItem, onAnalyze, isLoading }) => {
   const products: { id: FinancialProduct; label: string; icon: React.FC<React.SVGProps<SVGSVGElement>> }[] = [
@@ -120,7 +180,9 @@ const LoanForm: React.FC<LoanFormProps> = ({ inputs, product, onProductChange, o
                     {inputs.portfolio.map((item) => (
                         <div key={item.id} className="bg-slate-900/40 p-4 rounded-lg border border-slate-700 space-y-3">
                             <div className="flex justify-between items-center">
-                                <label htmlFor={`name-${item.id}`} className="block text-sm font-medium text-slate-300">Voce Portafoglio</label>
+                                <PortfolioTooltip type="name">
+                                    <label htmlFor={`name-${item.id}`} className="block text-sm font-medium text-slate-300">Voce Portafoglio</label>
+                                </PortfolioTooltip>
                                 <button type="button" onClick={() => onRemovePortfolioItem(item.id)} className="text-slate-500 hover:text-red-400 transition-colors">
                                     <TrashIcon className="w-5 h-5" />
                                 </button>
@@ -134,7 +196,9 @@ const LoanForm: React.FC<LoanFormProps> = ({ inputs, product, onProductChange, o
                             />
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label htmlFor={`amount-${item.id}`} className="block text-xs font-medium text-slate-400 mb-1">Importo</label>
+                                    <PortfolioTooltip type="amount">
+                                        <label htmlFor={`amount-${item.id}`} className="block text-xs font-medium text-slate-400 mb-1">Importo</label>
+                                    </PortfolioTooltip>
                                     <div className="relative">
                                         <input
                                             type="text"
@@ -149,7 +213,9 @@ const LoanForm: React.FC<LoanFormProps> = ({ inputs, product, onProductChange, o
                                     </div>
                                 </div>
                                 <div>
-                                    <label htmlFor={`return-${item.id}`} className="block text-xs font-medium text-slate-400 mb-1">Rendimento</label>
+                                    <PortfolioTooltip type="returnRate">
+                                        <label htmlFor={`return-${item.id}`} className="block text-xs font-medium text-slate-400 mb-1">Rendimento</label>
+                                    </PortfolioTooltip>
                                     <div className="relative">
                                         <input
                                             type="text"
