@@ -64,4 +64,4 @@ const ComparisonChart: React.FC<ComparisonChartProps> = ({ data }) => {
   );
 };
 
-export default ComparisonChart;
+export default React.memo(ComparisonChart);

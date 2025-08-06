@@ -93,4 +93,4 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToLoanCalculator, onNavig
     );
 };
 
-export default HomePage;
+export default React.memo(HomePage);

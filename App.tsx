@@ -1,7 +1,8 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { AllLoanInputs, LoanCalculations, FinancialAdvice, ChartData, FinancialProduct, PortfolioItem, View } from './types';
 import { getFinancialAdvice } from './services/geminiService';
+import { sanitizeInput, validateNumericInput } from './security.config';
 import LoanForm from './components/LoanForm';
 import ResultsDisplay from './components/ResultsDisplay';
 import RecommendationCard from './components/RecommendationCard';
@@ -48,18 +49,13 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // --- LOAN CALCULATOR LOGIC ---
-  const sanitizeNumericInput = (value: string): string => {
+  // Memoize utility functions for better performance
+  const sanitizeNumericInput = useCallback((value: string): string => {
     // Remove any non-numeric characters except decimal point
     return value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-  };
+  }, []);
 
-  const validateNumericInput = (value: string, min: number = 0, max: number = Infinity): boolean => {
-    const num = parseFloat(value);
-    return !isNaN(num) && num >= min && num <= max;
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
     // Sanitize decimal inputs
@@ -70,13 +66,13 @@ const App: React.FC = () => {
       }
       setInputs(prev => ({ ...prev, [name]: sanitized }));
     } else {
-      // For non-decimal inputs, still sanitize
-      const sanitized = value.trim().substring(0, 100); // Limit length to prevent abuse
+      // For non-decimal inputs, still sanitize using centralized utility
+      const sanitized = sanitizeInput(value);
       setInputs(prev => ({ ...prev, [name]: sanitized }));
     }
-  };
+  }, [sanitizeNumericInput]);
   
-  const handlePortfolioChange = (id: string, field: keyof Omit<PortfolioItem, 'id'>, value: string) => {
+  const handlePortfolioChange = useCallback((id: string, field: keyof Omit<PortfolioItem, 'id'>, value: string) => {
     setInputs(prev => ({
         ...prev,
         portfolio: prev.portfolio.map(item => {
@@ -94,10 +90,8 @@ const App: React.FC = () => {
                         return item; // Keep previous value if invalid
                     }
                 } else if (field === 'name') {
-                    // Sanitize text input
-                    sanitizedValue = value.trim().substring(0, 50); // Limit length
-                    // Basic XSS prevention
-                    sanitizedValue = sanitizedValue.replace(/[<>'"&]/g, '');
+                    // Sanitize text input using centralized security utility
+                    sanitizedValue = sanitizeInput(value);
                 }
                 
                 return { ...item, [field]: sanitizedValue };
@@ -105,23 +99,23 @@ const App: React.FC = () => {
             return item;
         })
     }));
-  };
+  }, [sanitizeNumericInput, validateNumericInput]);
 
-  const addPortfolioItem = () => {
+  const addPortfolioItem = useCallback(() => {
     setInputs(prev => ({
         ...prev,
         portfolio: [...prev.portfolio, { id: Date.now().toString(), name: '', amount: '0', returnRate: '0' }]
     }));
-  };
+  }, []);
 
-  const removePortfolioItem = (id: string) => {
+  const removePortfolioItem = useCallback((id: string) => {
     setInputs(prev => ({
         ...prev,
         portfolio: prev.portfolio.filter(item => item.id !== id)
     }));
-  };
+  }, []);
 
-  const handleProductChange = (newProduct: FinancialProduct) => {
+  const handleProductChange = useCallback((newProduct: FinancialProduct) => {
     setProduct(newProduct);
     const newDefaults: Partial<AllLoanInputs> = {};
     if (newProduct === 'Mutuo') {
@@ -144,7 +138,7 @@ const App: React.FC = () => {
     setAdvice(null);
     setChartData([]);
     setError(null);
-  };
+  }, []);
 
   const calculateLoan = useCallback((currentProduct: FinancialProduct, currentInputs: AllLoanInputs): LoanCalculations => {
     const getNum = (val: string) => parseFloat(val) || 0;
@@ -264,9 +258,16 @@ const App: React.FC = () => {
     }
   }, [inputs, product, calculateLoan]);
 
-  // --- RENDER LOGIC ---
+  // Memoize navigation handlers to prevent unnecessary re-renders
+  const navigationHandlers = useMemo(() => ({
+    toHome: () => setView('home'),
+    toLoanCalculator: () => setView('loanCalculator'),
+    toSalaryCalculator: () => setView('salaryCalculator'),
+    toInvestmentAnalysis: () => setView('investmentAnalysis'),
+  }), []);
 
-  const renderLoanCalculator = () => (
+  // Memoize the loan calculator render function
+  const renderLoanCalculator = useCallback(() => (
     <div className="min-h-screen flex flex-col pt-20">
       {/* Header Section */}
       <section className="section-sm">
@@ -340,13 +341,13 @@ const App: React.FC = () => {
 
       {/* Footer */}
       <Footer 
-        onNavigateToLoanCalculator={() => setView('loanCalculator')}
-        onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
-        onNavigateToHome={() => setView('home')}
-        onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
+        onNavigateToLoanCalculator={navigationHandlers.toLoanCalculator}
+        onNavigateToSalaryCalculator={navigationHandlers.toSalaryCalculator}
+        onNavigateToHome={navigationHandlers.toHome}
+        onNavigateToInvestmentAnalysis={navigationHandlers.toInvestmentAnalysis}
       />
     </div>
-  );
+  ), [calculations, advice, error, isLoading, inputs, product, chartData, handleAnalysis, handleInputChange, handlePortfolioChange, addPortfolioItem, removePortfolioItem, handleProductChange, navigationHandlers]);
 
   switch (view) {
     case 'loanCalculator':
@@ -354,10 +355,10 @@ const App: React.FC = () => {
         <>
           <NavBar
             currentView={view}
-            onNavigateToHome={() => setView('home')}
-            onNavigateToLoanCalculator={() => setView('loanCalculator')}
-            onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
-            onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
+            onNavigateToHome={navigationHandlers.toHome}
+            onNavigateToLoanCalculator={navigationHandlers.toLoanCalculator}
+            onNavigateToSalaryCalculator={navigationHandlers.toSalaryCalculator}
+            onNavigateToInvestmentAnalysis={navigationHandlers.toInvestmentAnalysis}
           />
           {renderLoanCalculator()}
           <CookieBanner />
@@ -368,14 +369,14 @@ const App: React.FC = () => {
         <>
           <NavBar
             currentView={view}
-            onNavigateToHome={() => setView('home')}
-            onNavigateToLoanCalculator={() => setView('loanCalculator')}
-            onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
-            onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
+            onNavigateToHome={navigationHandlers.toHome}
+            onNavigateToLoanCalculator={navigationHandlers.toLoanCalculator}
+            onNavigateToSalaryCalculator={navigationHandlers.toSalaryCalculator}
+            onNavigateToInvestmentAnalysis={navigationHandlers.toInvestmentAnalysis}
           />
           <SalaryCalculator 
-            onBack={() => setView('home')} 
-            onNavigateToLoanCalculator={() => setView('loanCalculator')}
+            onBack={navigationHandlers.toHome}
+            onNavigateToLoanCalculator={navigationHandlers.toLoanCalculator}
           />
           <CookieBanner />
         </>
@@ -385,17 +386,17 @@ const App: React.FC = () => {
         <>
           <NavBar
             currentView={view}
-            onNavigateToHome={() => setView('home')}
-            onNavigateToLoanCalculator={() => setView('loanCalculator')}
-            onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
-            onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
+            onNavigateToHome={navigationHandlers.toHome}
+            onNavigateToLoanCalculator={navigationHandlers.toLoanCalculator}
+            onNavigateToSalaryCalculator={navigationHandlers.toSalaryCalculator}
+            onNavigateToInvestmentAnalysis={navigationHandlers.toInvestmentAnalysis}
           />
           <InvestmentAnalysis />
           <Footer 
-            onNavigateToLoanCalculator={() => setView('loanCalculator')}
-            onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
-            onNavigateToHome={() => setView('home')}
-            onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
+            onNavigateToLoanCalculator={navigationHandlers.toLoanCalculator}
+            onNavigateToSalaryCalculator={navigationHandlers.toSalaryCalculator}
+            onNavigateToHome={navigationHandlers.toHome}
+            onNavigateToInvestmentAnalysis={navigationHandlers.toInvestmentAnalysis}
           />
           <CookieBanner />
         </>
@@ -406,15 +407,15 @@ const App: React.FC = () => {
         <>
           <NavBar
             currentView={view}
-            onNavigateToHome={() => setView('home')}
-            onNavigateToLoanCalculator={() => setView('loanCalculator')}
-            onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
-            onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
+            onNavigateToHome={navigationHandlers.toHome}
+            onNavigateToLoanCalculator={navigationHandlers.toLoanCalculator}
+            onNavigateToSalaryCalculator={navigationHandlers.toSalaryCalculator}
+            onNavigateToInvestmentAnalysis={navigationHandlers.toInvestmentAnalysis}
           />
           <HomePage
-            onNavigateToLoanCalculator={() => setView('loanCalculator')}
-            onNavigateToSalaryCalculator={() => setView('salaryCalculator')}
-            onNavigateToInvestmentAnalysis={() => setView('investmentAnalysis')}
+            onNavigateToLoanCalculator={navigationHandlers.toLoanCalculator}
+            onNavigateToSalaryCalculator={navigationHandlers.toSalaryCalculator}
+            onNavigateToInvestmentAnalysis={navigationHandlers.toInvestmentAnalysis}
           />
           <CookieBanner />
         </>

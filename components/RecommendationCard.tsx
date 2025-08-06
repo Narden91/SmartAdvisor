@@ -81,4 +81,4 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({ advice, isLoadi
   );
 };
 
-export default RecommendationCard;
+export default React.memo(RecommendationCard);

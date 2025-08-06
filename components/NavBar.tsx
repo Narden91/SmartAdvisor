@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LogoIcon, CalculatorIcon, WalletIcon, HomeIcon, TrendingUpIcon } from './icons';
 
 interface NavBarProps {
@@ -16,7 +16,7 @@ const NavBar: React.FC<NavBarProps> = ({
     onNavigateToSalaryCalculator,
     onNavigateToInvestmentAnalysis
 }) => {
-    const navItems = [
+    const navItems = useMemo(() => [
         {
             id: 'loanCalculator' as const,
             label: 'Consulente Finanziario',
@@ -35,7 +35,7 @@ const NavBar: React.FC<NavBarProps> = ({
             icon: TrendingUpIcon,
             onClick: onNavigateToInvestmentAnalysis
         }
-    ];
+    ], [onNavigateToLoanCalculator, onNavigateToSalaryCalculator, onNavigateToInvestmentAnalysis]);
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50">
@@ -92,4 +92,4 @@ const NavBar: React.FC<NavBarProps> = ({
     );
 };
 
-export default NavBar;
+export default React.memo(NavBar);

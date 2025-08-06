@@ -113,4 +113,4 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ calculations, product, 
   );
 };
 
-export default ResultsDisplay;
+export default React.memo(ResultsDisplay);

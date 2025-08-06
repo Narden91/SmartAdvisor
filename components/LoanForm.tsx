@@ -2,6 +2,7 @@
 import React from 'react';
 import { AllLoanInputs, FinancialProduct, PortfolioItem } from '../types';
 import { PrestitoIcon, FinanziariaIcon, MutuoIcon, SparklesIcon, PlusCircleIcon, TrashIcon, InfoIcon } from './icons';
+import { sanitizeInput } from '../security.config';
 
 interface LoanFormProps {
   inputs: AllLoanInputs;
@@ -94,7 +95,7 @@ const InputField: React.FC<{
   );
 };
 
-const LoanForm: React.FC<LoanFormProps> = ({ inputs, product, onProductChange, onInputChange, onPortfolioChange, onAddPortfolioItem, onRemovePortfolioItem, onAnalyze, isLoading }) => {
+const LoanForm: React.FC<LoanFormProps> = React.memo(({ inputs, product, onProductChange, onInputChange, onPortfolioChange, onAddPortfolioItem, onRemovePortfolioItem, onAnalyze, isLoading }) => {
   const products: { id: FinancialProduct; label: string; icon: React.FC<React.SVGProps<SVGSVGElement>> }[] = [
     { id: 'Prestito', label: 'Prestito', icon: PrestitoIcon },
     { id: 'Finanziaria', label: 'Finanziaria', icon: FinanziariaIcon },
@@ -269,6 +270,6 @@ const LoanForm: React.FC<LoanFormProps> = ({ inputs, product, onProductChange, o
       </form>
     </div>
   );
-};
+});
 
 export default LoanForm;

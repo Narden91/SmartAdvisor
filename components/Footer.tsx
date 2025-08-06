@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LogoIcon } from './icons';
 
 interface FooterProps {
@@ -14,7 +14,7 @@ const Footer: React.FC<FooterProps> = ({
     onNavigateToHome,
     onNavigateToInvestmentAnalysis
 }) => {
-    const currentYear = new Date().getFullYear();
+    const currentYear = useMemo(() => new Date().getFullYear(), []);
 
     return (
         <footer className="section bg-slate-900/80 border-t border-slate-700/50">
@@ -98,4 +98,4 @@ const Footer: React.FC<FooterProps> = ({
     );
 };
 
-export default Footer;
+export default React.memo(Footer);

@@ -17,6 +17,28 @@ export default defineConfig(({ mode }) => {
           '@': path.resolve(__dirname, '.'),
         }
       },
+      server: {
+        headers: {
+          // Security headers for development
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'X-XSS-Protection': '1; mode=block',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Content-Security-Policy': [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com",
+            "font-src 'self' https://fonts.gstatic.com data:",
+            "img-src 'self' data: blob: https:",
+            "connect-src 'self' https://generativelanguage.googleapis.com",
+            "frame-src 'none'",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+            "frame-ancestors 'none'"
+          ].join('; ')
+        }
+      },
       build: {
         rollupOptions: {
           output: {
@@ -27,7 +49,16 @@ export default defineConfig(({ mode }) => {
             }
           }
         },
-        chunkSizeWarningLimit: 1000
+        chunkSizeWarningLimit: 1000,
+        // Security optimizations
+        sourcemap: false, // Disable source maps in production for security
+        minify: 'terser',
+        terserOptions: {
+          compress: {
+            drop_console: true, // Remove console statements in production
+            drop_debugger: true
+          }
+        }
       }
     };
 });

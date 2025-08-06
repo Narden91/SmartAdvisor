@@ -1,12 +1,19 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 import { AllLoanInputs, FinancialAdvice, FinancialProduct, LoanCalculations, PortfolioItem } from '../types';
+import { isDomainAllowed } from '../security.config';
 
 // Get API key from environment variables (supports both development and production)
 const apiKey = process.env.VITE_GEMINI_API_KEY;
 
 if (!apiKey) {
     throw new Error("Gemini API key not found. Please set VITE_GEMINI_API_KEY environment variable.");
+}
+
+// Validate API endpoint domain for security
+const GEMINI_API_DOMAIN = 'https://generativelanguage.googleapis.com';
+if (!isDomainAllowed(GEMINI_API_DOMAIN)) {
+    throw new Error("Gemini API domain not allowed by security policy.");
 }
 
 const ai = new GoogleGenAI({ apiKey });
