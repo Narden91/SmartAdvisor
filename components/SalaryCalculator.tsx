@@ -47,9 +47,36 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
         </span>
     );
 
+    const sanitizeNumericInput = (value: string): string => {
+        return value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    };
+
+    const validateNumericInput = (value: string, min: number = 0, max: number = Infinity): boolean => {
+        const num = parseFloat(value);
+        return !isNaN(num) && num >= min && num <= max;
+    };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setInputs(prev => ({ ...prev, [name]: value }));
+        
+        if (e.target.type === 'number' && value) {
+            const sanitized = sanitizeNumericInput(value);
+            // Validate specific constraints
+            if (name === 'ral' && !validateNumericInput(sanitized, 1, 10000000)) {
+                return; // Skip update for invalid RAL
+            }
+            if (name === 'addizionaleComunale' && !validateNumericInput(sanitized, 0, 100)) {
+                return; // Skip update for invalid municipal tax rate
+            }
+            if ((name === 'figliACarico' || name === 'altriFamiliariACarico') && !validateNumericInput(sanitized, 0, 50)) {
+                return; // Skip update for invalid family members count
+            }
+            setInputs(prev => ({ ...prev, [name]: sanitized }));
+        } else {
+            // For non-numeric inputs (select elements), apply basic sanitization
+            const sanitized = typeof value === 'string' ? value.trim().substring(0, 100) : value;
+            setInputs(prev => ({ ...prev, [name]: sanitized }));
+        }
     };
 
     const handleCalculate = (e: React.FormEvent) => {
@@ -58,9 +85,32 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
         setResults(null);
         setIsLoading(true);
 
-        // Basic validation
-        if (parseFloat(inputs.ral) <= 0) {
-            setError("La Retribuzione Annua Lorda (RAL) deve essere un valore positivo.");
+        // Enhanced validation
+        const ralNum = parseFloat(inputs.ral);
+        const addizionaleComunaleNum = parseFloat(inputs.addizionaleComunale);
+        const figliNum = parseInt(inputs.figliACarico);
+        const altriNum = parseInt(inputs.altriFamiliariACarico);
+
+        if (isNaN(ralNum) || ralNum <= 0 || ralNum > 10000000) {
+            setError("La RAL deve essere compresa tra 1€ e 10.000.000€.");
+            setIsLoading(false);
+            return;
+        }
+
+        if (isNaN(addizionaleComunaleNum) || addizionaleComunaleNum < 0 || addizionaleComunaleNum > 100) {
+            setError("L'addizionale comunale deve essere compresa tra 0% e 100%.");
+            setIsLoading(false);
+            return;
+        }
+
+        if (isNaN(figliNum) || figliNum < 0 || figliNum > 50) {
+            setError("Il numero di figli a carico deve essere compreso tra 0 e 50.");
+            setIsLoading(false);
+            return;
+        }
+
+        if (isNaN(altriNum) || altriNum < 0 || altriNum > 50) {
+            setError("Il numero di altri familiari a carico deve essere compreso tra 0 e 50.");
             setIsLoading(false);
             return;
         }
@@ -70,7 +120,6 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
             setResults(calculatedResults);
         } catch (err) {
             setError("Si è verificato un errore durante il calcolo. Riprova.");
-            console.error(err);
         } finally {
             setIsLoading(false);
         }

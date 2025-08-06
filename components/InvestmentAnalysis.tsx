@@ -36,16 +36,60 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = () => {
     const [results, setResults] = useState<InvestmentResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
+    const sanitizeNumericInput = (value: string): string => {
+        return value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    };
+
+    const validateNumericInput = (value: string, min: number = 0, max: number = Infinity): boolean => {
+        const num = parseFloat(value);
+        return !isNaN(num) && num >= min && num <= max;
+    };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setInputs(prev => ({ ...prev, [name]: value }));
+        
+        if (e.target.type === 'text' && (name === 'investmentAmount' || name === 'timeHorizonYears')) {
+            const sanitized = sanitizeNumericInput(value);
+            // Validate specific constraints
+            if (name === 'investmentAmount' && !validateNumericInput(sanitized, 1, 10000000)) {
+                return; // Skip update for invalid investment amount
+            }
+            if (name === 'timeHorizonYears' && !validateNumericInput(sanitized, 1, 100)) {
+                return; // Skip update for invalid time horizon
+            }
+            setInputs(prev => ({ ...prev, [name]: sanitized }));
+        } else {
+            setInputs(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handlePortfolioChange = (id: string, field: keyof Omit<PortfolioItem, 'id'>, value: string) => {
         setPortfolio(prev =>
-            prev.map(item =>
-                item.id === id ? { ...item, [field]: value } : item
-            )
+            prev.map(item => {
+                if (item.id === id) {
+                    let sanitizedValue = value;
+                    
+                    // Sanitize based on field type
+                    if (field === 'amount' || field === 'returnRate') {
+                        sanitizedValue = sanitizeNumericInput(value);
+                        // Validate numeric constraints
+                        if (field === 'amount' && !validateNumericInput(sanitizedValue, 0, 100)) {
+                            return item; // Keep previous value if invalid (percentage allocation)
+                        }
+                        if (field === 'returnRate' && !validateNumericInput(sanitizedValue, -100, 100)) {
+                            return item; // Keep previous value if invalid
+                        }
+                    } else if (field === 'name') {
+                        // Sanitize text input
+                        sanitizedValue = value.trim().substring(0, 50); // Limit length
+                        // Basic XSS prevention
+                        sanitizedValue = sanitizedValue.replace(/[<>'"&]/g, '');
+                    }
+                    
+                    return { ...item, [field]: sanitizedValue };
+                }
+                return item;
+            })
         );
     };
 
@@ -67,8 +111,22 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = () => {
             const amount = parseFloat(inputs.investmentAmount) || 0;
             const years = parseFloat(inputs.timeHorizonYears) || 0;
             
-            // Calculate weighted average return
+            // Enhanced validation
+            if (amount <= 0 || amount > 10000000) {
+                throw new Error("L'importo da investire deve essere compreso tra 1€ e 10.000.000€.");
+            }
+            
+            if (years <= 0 || years > 100) {
+                throw new Error("L'orizzonte temporale deve essere compreso tra 1 e 100 anni.");
+            }
+            
+            // Validate portfolio allocation
             const totalWeight = portfolio.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+            if (Math.abs(totalWeight - 100) > 0.01) {
+                throw new Error("L'allocazione del portafoglio deve sommare al 100%.");
+            }
+            
+            // Calculate weighted average return
             const weightedReturn = portfolio.reduce((sum, item) => {
                 const weight = (parseFloat(item.amount) || 0) / totalWeight;
                 const rate = parseFloat(item.returnRate) || 0;
@@ -91,7 +149,9 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = () => {
                 inflationAdjustedValue: inflationAdjustedValue
             });
         } catch (error) {
-            console.error('Investment calculation error:', error);
+            // Handle calculation errors
+            const errorMessage = error instanceof Error ? error.message : "Si è verificato un errore durante il calcolo.";
+            alert(errorMessage); // Replace with proper error state management if needed
         } finally {
             setIsLoading(false);
         }

@@ -23,7 +23,7 @@ const CookieBanner: React.FC = () => {
         
         // Initialize analytics if accepted
         if (typeof window !== 'undefined') {
-            console.log('Analytics initialized - user accepted all cookies');
+            // Analytics initialized - user accepted all cookies
         }
     };
 

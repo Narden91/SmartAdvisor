@@ -49,20 +49,61 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // --- LOAN CALCULATOR LOGIC ---
+  const sanitizeNumericInput = (value: string): string => {
+    // Remove any non-numeric characters except decimal point
+    return value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+  };
+
+  const validateNumericInput = (value: string, min: number = 0, max: number = Infinity): boolean => {
+    const num = parseFloat(value);
+    return !isNaN(num) && num >= min && num <= max;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (e.target.inputMode === 'decimal' && value && !/^\d*\.?\d*$/.test(value)) {
-      return;
+    
+    // Sanitize decimal inputs
+    if (e.target.inputMode === 'decimal' && value) {
+      const sanitized = sanitizeNumericInput(value);
+      if (!/^\d*\.?\d*$/.test(sanitized)) {
+        return;
+      }
+      setInputs(prev => ({ ...prev, [name]: sanitized }));
+    } else {
+      // For non-decimal inputs, still sanitize
+      const sanitized = value.trim().substring(0, 100); // Limit length to prevent abuse
+      setInputs(prev => ({ ...prev, [name]: sanitized }));
     }
-    setInputs(prev => ({ ...prev, [name]: value }));
   };
   
   const handlePortfolioChange = (id: string, field: keyof Omit<PortfolioItem, 'id'>, value: string) => {
     setInputs(prev => ({
         ...prev,
-        portfolio: prev.portfolio.map(item =>
-            item.id === id ? { ...item, [field]: value } : item
-        )
+        portfolio: prev.portfolio.map(item => {
+            if (item.id === id) {
+                let sanitizedValue = value;
+                
+                // Sanitize based on field type
+                if (field === 'amount' || field === 'returnRate') {
+                    sanitizedValue = sanitizeNumericInput(value);
+                    // Validate numeric constraints
+                    if (field === 'amount' && !validateNumericInput(sanitizedValue, 0, 999999999)) {
+                        return item; // Keep previous value if invalid
+                    }
+                    if (field === 'returnRate' && !validateNumericInput(sanitizedValue, -100, 100)) {
+                        return item; // Keep previous value if invalid
+                    }
+                } else if (field === 'name') {
+                    // Sanitize text input
+                    sanitizedValue = value.trim().substring(0, 50); // Limit length
+                    // Basic XSS prevention
+                    sanitizedValue = sanitizedValue.replace(/[<>'"&]/g, '');
+                }
+                
+                return { ...item, [field]: sanitizedValue };
+            }
+            return item;
+        })
     }));
   };
 
@@ -174,8 +215,27 @@ const App: React.FC = () => {
 
     const { capitale, durataMesi } = inputs;
     const loanAmountNum = parseFloat(capitale);
-    if (isNaN(loanAmountNum) || loanAmountNum <= 0 || parseInt(durataMesi) <= 0) {
-      setError("Inserisci un importo e una durata validi per il finanziamento.");
+    const durationNum = parseInt(durataMesi);
+    
+    // Enhanced validation
+    if (isNaN(loanAmountNum) || loanAmountNum <= 0 || loanAmountNum > 10000000) {
+      setError("Inserisci un importo valido compreso tra 1€ e 10.000.000€.");
+      return;
+    }
+    
+    if (isNaN(durationNum) || durationNum <= 0 || durationNum > 600) {
+      setError("Inserisci una durata valida compresa tra 1 e 600 mesi.");
+      return;
+    }
+
+    // Validate required fields based on product type
+    if (product === 'Prestito' && (!inputs.tan || parseFloat(inputs.tan) <= 0)) {
+      setError("Il TAN deve essere un valore positivo per i prestiti.");
+      return;
+    }
+    
+    if (product === 'Mutuo' && (!inputs.spread || !inputs.parametroRiferimento)) {
+      setError("Spread e parametro di riferimento sono obbligatori per i mutui.");
       return;
     }
     
@@ -197,7 +257,6 @@ const App: React.FC = () => {
       ]);
 
     } catch (e) {
-      console.error(e);
       const errorMessage = e instanceof Error ? e.message : "Si è verificato un errore inaspettato.";
       setError(errorMessage);
     } finally {

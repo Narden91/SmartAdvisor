@@ -36,13 +36,12 @@ export const hasConsentForEssential = (): boolean => {
 // Analytics wrapper that respects cookie consent
 export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
     if (!hasConsentForAnalytics()) {
-        console.log('Analytics tracking blocked by cookie consent:', eventName);
-        return;
+        return; // Analytics tracking blocked by cookie consent
     }
     
     // Here you would integrate with your analytics service
     // For example: gtag('event', eventName, properties);
-    console.log('Analytics event tracked:', eventName, properties);
+    // Analytics event tracked: eventName, properties
     
     // Store analytics data locally if needed
     try {
@@ -60,7 +59,7 @@ export const trackEvent = (eventName: string, properties?: Record<string, any>) 
         
         localStorage.setItem('smartadvisor_analytics', JSON.stringify(analyticsData));
     } catch (error) {
-        console.warn('Could not store analytics data:', error);
+        // Could not store analytics data - silently fail
     }
 };
 
@@ -105,7 +104,7 @@ export const clearNonEssentialCookies = () => {
     try {
         localStorage.removeItem('smartadvisor_analytics');
     } catch (error) {
-        console.warn('Could not clear analytics data:', error);
+        // Could not clear analytics data - silently fail
     }
 };
 

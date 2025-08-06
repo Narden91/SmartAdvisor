@@ -3,7 +3,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { AllLoanInputs, FinancialAdvice, FinancialProduct, LoanCalculations, PortfolioItem } from '../types';
 
 // Get API key from environment variables (supports both development and production)
-const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+const apiKey = process.env.VITE_GEMINI_API_KEY;
 
 if (!apiKey) {
     throw new Error("Gemini API key not found. Please set VITE_GEMINI_API_KEY environment variable.");
@@ -114,7 +114,6 @@ export const getFinancialAdvice = async (inputs: AllLoanInputs, product: Financi
         const jsonText = response.text?.trim();
 
         if (!jsonText) {
-            console.error("Risposta vuota dal modello AI");
             throw new Error("Il modello AI ha restituito una risposta vuota. Riprova.");
         }
         
@@ -126,7 +125,6 @@ export const getFinancialAdvice = async (inputs: AllLoanInputs, product: Financi
         return parsedResponse as FinancialAdvice;
 
     } catch (error) {
-        console.error("Errore nel recuperare o analizzare la consulenza da Gemini:", error);
         if (error instanceof SyntaxError) {
             // Catches JSON.parse errors
             throw new Error("Il modello AI ha restituito una risposta malformata. Impossibile analizzare i dati.");
