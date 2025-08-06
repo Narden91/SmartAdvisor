@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { TrendingUpIcon, PlusCircleIcon, TrashIcon, ChartBarIcon } from './icons';
 import { PortfolioItem } from '../types';
+import { sanitizeInput, validateNumericInput } from '../security.config';
 
 interface InvestmentAnalysisProps {
     // We can extend this later with additional props if needed
@@ -19,7 +20,7 @@ interface InvestmentResult {
     inflationAdjustedValue: number;
 }
 
-const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = () => {
+const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = React.memo(() => {
     const [inputs, setInputs] = useState<InvestmentInput>({
         investmentAmount: '10000',
         timeHorizonYears: '10',
@@ -36,16 +37,11 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = () => {
     const [results, setResults] = useState<InvestmentResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const sanitizeNumericInput = (value: string): string => {
+    const sanitizeNumericInput = useCallback((value: string): string => {
         return value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-    };
+    }, []);
 
-    const validateNumericInput = (value: string, min: number = 0, max: number = Infinity): boolean => {
-        const num = parseFloat(value);
-        return !isNaN(num) && num >= min && num <= max;
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         
         if (e.target.type === 'text' && (name === 'investmentAmount' || name === 'timeHorizonYears')) {
@@ -61,9 +57,9 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = () => {
         } else {
             setInputs(prev => ({ ...prev, [name]: value }));
         }
-    };
+    }, [sanitizeNumericInput]);
 
-    const handlePortfolioChange = (id: string, field: keyof Omit<PortfolioItem, 'id'>, value: string) => {
+    const handlePortfolioChange = useCallback((id: string, field: keyof Omit<PortfolioItem, 'id'>, value: string) => {
         setPortfolio(prev =>
             prev.map(item => {
                 if (item.id === id) {
@@ -80,10 +76,8 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = () => {
                             return item; // Keep previous value if invalid
                         }
                     } else if (field === 'name') {
-                        // Sanitize text input
-                        sanitizedValue = value.trim().substring(0, 50); // Limit length
-                        // Basic XSS prevention
-                        sanitizedValue = sanitizedValue.replace(/[<>'"&]/g, '');
+                        // Use centralized security utility
+                        sanitizedValue = sanitizeInput(value);
                     }
                     
                     return { ...item, [field]: sanitizedValue };
@@ -91,18 +85,18 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = () => {
                 return item;
             })
         );
-    };
+    }, [sanitizeNumericInput]);
 
-    const addPortfolioItem = () => {
+    const addPortfolioItem = useCallback(() => {
         setPortfolio(prev => [
             ...prev,
             { id: Date.now().toString(), name: '', amount: '0', returnRate: '0' }
         ]);
-    };
+    }, []);
 
-    const removePortfolioItem = (id: string) => {
+    const removePortfolioItem = useCallback((id: string) => {
         setPortfolio(prev => prev.filter(item => item.id !== id));
-    };
+    }, []);
 
     const calculateInvestment = useCallback(() => {
         setIsLoading(true);
@@ -226,29 +220,27 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = () => {
             {/* Header Section */}
             <section className="section-sm">
                 <div className="container">
-                    <div className="text-center">
-                        <TrendingUpIcon className="w-16 h-16 text-cyan-400 mx-auto mb-4" />
-                        <h1 className="heading-display text-white tracking-tight mb-4">
-                            Analisi <span className="text-cyan-400">Investimenti</span>
-                        </h1>
-                        <p className="body-lg max-w-2xl mx-auto text-slate-300">
-                            Simula la crescita del tuo portafoglio nel tempo e scopri il potenziale dei tuoi investimenti.
-                        </p>
-                    </div>
+                    <header className="flex items-center gap-4 animate-fade-in">
+                        <div className="flex items-center gap-4">
+                            <TrendingUpIcon className="w-14 h-14 text-cyan-400" />
+                            <div>
+                                <h1 className="heading-h1 text-white">Analisi Investimenti</h1>
+                                <p className="body text-slate-400 mt-1">Simula la crescita del tuo portafoglio nel tempo</p>
+                            </div>
+                        </div>
+                    </header>
                 </div>
             </section>
 
             {/* Main Content Section */}
             <section className="section flex-1">
                 <div className="container">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <main className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-slide-up">
                         {/* Input Form */}
                         <div className="lg:col-span-1">
-                            <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-slate-700/80 sticky top-28">
-                                <div className="flex items-center gap-3 mb-6">
-                                    {/* <TrendingUpIcon className="w-6 h-6 text-cyan-400" /> */}
-                                    <h2 className="heading-h2 text-white">Parametri di Analisi</h2>
-                                </div>
+                            <div className="bg-slate-800/60 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-slate-700/80">
+                                <h2 className="text-xl font-bold text-white mb-2">Parametri di Analisi</h2>
+                                <p className="text-slate-400 mb-4">Configura i tuoi parametri di investimento.</p>
                                 
                                 <form onSubmit={(e) => { e.preventDefault(); calculateInvestment(); }} className="space-y-4">
                                     <InputField
@@ -428,11 +420,11 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = () => {
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </main>
                 </div>
             </section>
         </div>
     );
-};
+});
 
 export default InvestmentAnalysis;
