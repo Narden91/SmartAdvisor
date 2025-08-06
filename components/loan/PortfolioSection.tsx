@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { AllLoanInputs, PortfolioItem } from '../../types';
 import { PlusCircleIcon, TrashIcon } from '../icons';
 import InputField from './InputField';
@@ -50,6 +50,22 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = React.memo(({
   onAddPortfolioItem, 
   onRemovePortfolioItem 
 }) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const prevPortfolioLengthRef = useRef(inputs.portfolio.length);
+
+  // Auto-scroll to bottom when new portfolio item is added
+  useEffect(() => {
+    if (inputs.portfolio.length > prevPortfolioLengthRef.current && scrollContainerRef.current) {
+      // Scroll to bottom with smooth behavior when a new item is added
+      setTimeout(() => {
+        scrollContainerRef.current?.scrollTo({
+          top: scrollContainerRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }, 100); // Small delay to ensure the DOM has updated
+    }
+    prevPortfolioLengthRef.current = inputs.portfolio.length;
+  }, [inputs.portfolio.length]);
   return (
     <div>
       <div className="h-px bg-slate-700 my-6"></div>
@@ -67,74 +83,96 @@ const PortfolioSection: React.FC<PortfolioSectionProps> = React.memo(({
         />
         
         <div>
-          <h4 className="text-lg font-semibold text-white mb-3">Portafoglio Investimenti</h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-lg font-semibold text-white">Portafoglio Investimenti</h4>
+            {inputs.portfolio.length > 0 && (
+              <span className="text-xs text-slate-400 bg-slate-700/50 px-2 py-1 rounded">
+                {inputs.portfolio.length} asset{inputs.portfolio.length !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+          {inputs.portfolio.length === 0 && (
+            <div className="bg-slate-900/20 border border-dashed border-slate-600 rounded-lg p-4 mb-4 text-center">
+              <p className="text-slate-400 text-sm mb-2">
+                Aggiungi i tuoi investimenti attuali per un'analisi più accurata
+              </p>
+              <p className="text-slate-500 text-xs">
+                Opzionale: puoi includere azioni, ETF, obbligazioni, fondi comuni, ecc.
+              </p>
+            </div>
+          )}
           <div className="space-y-4">
-            {inputs.portfolio.map((item) => (
-              <div key={item.id} className="bg-slate-900/40 p-4 rounded-lg border border-slate-700 space-y-3">
-                <div className="flex justify-between items-center">
-                  <PortfolioTooltip type="name">
-                    <label htmlFor={`name-${item.id}`} className="block text-sm font-medium text-slate-300">Voce Portafoglio</label>
-                  </PortfolioTooltip>
-                  <button 
-                    type="button" 
-                    onClick={() => onRemovePortfolioItem(item.id)} 
-                    className="text-slate-500 hover:text-red-400 transition-colors"
-                  >
-                    <TrashIcon className="w-5 h-5" />
-                  </button>
-                </div>
-                <input
-                  id={`name-${item.id}`}
-                  value={item.name}
-                  onChange={(e) => onPortfolioChange(item.id, 'name', e.target.value)}
-                  placeholder="es. Azioni ETF"
-                  className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2 px-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <PortfolioTooltip type="amount">
-                      <label htmlFor={`amount-${item.id}`} className="block text-xs font-medium text-slate-400 mb-1">Importo</label>
+            <div 
+              ref={scrollContainerRef}
+              className="space-y-4 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800"
+            >
+              {inputs.portfolio.map((item) => (
+                <div key={item.id} className="bg-slate-900/40 p-4 rounded-lg border border-slate-700 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <PortfolioTooltip type="name">
+                      <label htmlFor={`name-${item.id}`} className="block text-sm font-medium text-slate-300">Voce Portafoglio</label>
                     </PortfolioTooltip>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        id={`amount-${item.id}`}
-                        value={item.amount}
-                        onChange={(e) => onPortfolioChange(item.id, 'amount', e.target.value)}
-                        className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2 pl-3 pr-8 text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                        placeholder="es. 10000"
-                      />
-                      <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">€</span>
+                    <button 
+                      type="button" 
+                      onClick={() => onRemovePortfolioItem(item.id)} 
+                      className="text-slate-500 hover:text-red-400 transition-colors"
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <input
+                    id={`name-${item.id}`}
+                    value={item.name}
+                    onChange={(e) => onPortfolioChange(item.id, 'name', e.target.value)}
+                    placeholder="es. ETF S&P 500, Azioni Tesla, BTP, etc."
+                    className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2 px-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <PortfolioTooltip type="amount">
+                        <label htmlFor={`amount-${item.id}`} className="block text-xs font-medium text-slate-400 mb-1">Importo</label>
+                      </PortfolioTooltip>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          id={`amount-${item.id}`}
+                          value={item.amount}
+                          onChange={(e) => onPortfolioChange(item.id, 'amount', e.target.value)}
+                          className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2 pl-3 pr-8 text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                          placeholder="es. 5000"
+                        />
+                        <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">€</span>
+                      </div>
+                    </div>
+                    <div>
+                      <PortfolioTooltip type="returnRate">
+                        <label htmlFor={`return-${item.id}`} className="block text-xs font-medium text-slate-400 mb-1">Rendimento</label>
+                      </PortfolioTooltip>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          id={`return-${item.id}`}
+                          value={item.returnRate}
+                          onChange={(e) => onPortfolioChange(item.id, 'returnRate', e.target.value)}
+                          className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2 pl-3 pr-8 text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                          placeholder="es. 7"
+                        />
+                        <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">%</span>
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <PortfolioTooltip type="returnRate">
-                      <label htmlFor={`return-${item.id}`} className="block text-xs font-medium text-slate-400 mb-1">Rendimento</label>
-                    </PortfolioTooltip>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        id={`return-${item.id}`}
-                        value={item.returnRate}
-                        onChange={(e) => onPortfolioChange(item.id, 'returnRate', e.target.value)}
-                        className="w-full bg-slate-700/50 border border-slate-600 rounded-lg py-2 pl-3 pr-8 text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                        placeholder="es. 8"
-                      />
-                      <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">%</span>
-                    </div>
-                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             <button
               type="button"
               onClick={onAddPortfolioItem}
               className="w-full flex items-center justify-center gap-2 text-cyan-400 font-medium py-2.5 px-4 rounded-lg border-2 border-dashed border-slate-600 hover:bg-slate-700/50 hover:border-cyan-500/50 transition-colors"
             >
               <PlusCircleIcon className="w-5 h-5" />
-              Aggiungi Voce al Portafoglio
+              {inputs.portfolio.length === 0 ? 'Aggiungi Primo Investimento' : 'Aggiungi Voce al Portafoglio'}
             </button>
           </div>
         </div>

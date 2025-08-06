@@ -19,10 +19,7 @@ const initialInputs: AllLoanInputs = {
     assicurazioneObbligatoria: '20',
     impostaSostitutiva: '500',
     liquidSavings: '5000',
-    portfolio: [
-        { id: '1', name: 'Azioni ETF (VWCE)', amount: '10000', returnRate: '8' },
-        { id: '2', name: 'Conto Deposito', amount: '5000', returnRate: '3.5' },
-    ],
+    portfolio: [],
 };
 
 export const useLoanCalculator = () => {
@@ -92,7 +89,12 @@ export const useLoanCalculator = () => {
     const addPortfolioItem = useCallback(() => {
         setInputs(prev => ({
             ...prev,
-            portfolio: [...prev.portfolio, { id: Date.now().toString(), name: '', amount: '0', returnRate: '0' }]
+            portfolio: [...prev.portfolio, { 
+                id: Date.now().toString(), 
+                name: '', 
+                amount: '', 
+                returnRate: '' 
+            }]
         }));
     }, []);
 
