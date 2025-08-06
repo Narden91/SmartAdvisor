@@ -182,9 +182,9 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = React.memo(() => {
     }, [calculateInvestment]);
 
     return (
-        <div className="min-h-screen flex flex-col">
-            {/* Header Section - Fixed height */}
-            <section className="pt-20 pb-6">
+        <div className="min-h-screen flex flex-col pt-20">
+            {/* Header Section */}
+            <section className="section-sm">
                 <div className="container">
                     <header className="flex items-center gap-4 animate-fade-in">
                         <div className="flex items-center gap-4">
@@ -198,13 +198,13 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = React.memo(() => {
                 </div>
             </section>
 
-            {/* Main Content Section - Flex layout that respects footer */}
-            <section className="flex-1 pb-16 min-h-0">
-                <div className="container h-full">
-                    <main className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-slide-up h-full">
+            {/* Main Content Section */}
+            <section className="section flex-1">
+                <div className="container">
+                    <main className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-slide-up">
                         {/* Input Form - Scrollable when needed */}
-                        <div className="lg:col-span-1 flex flex-col max-h-full">
-                            <div className="space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800 pr-2">
+                        <div className="lg:col-span-1">
+                            <div className="space-y-6">
                                 <InvestmentForm
                                     investmentAmount={inputs.investmentAmount}
                                     timeHorizonYears={inputs.timeHorizonYears}
@@ -223,24 +223,22 @@ const InvestmentAnalysis: React.FC<InvestmentAnalysisProps> = React.memo(() => {
                             </div>
                         </div>
 
-                        {/* Results - Fixed height */}
-                        <div className="lg:col-span-2 flex flex-col max-h-full">
-                            <div className="flex-1 min-h-0">
-                                {results ? (
-                                    <InvestmentResults 
-                                        results={results} 
-                                        timeHorizon={inputs.timeHorizonYears} 
-                                    />
-                                ) : (
-                                    <div className="flex flex-col justify-center items-center h-full bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 text-center border-2 border-dashed border-slate-700">
-                                        <TrendingUpIcon className="w-16 h-16 text-cyan-500/50 mb-4" />
-                                        <h2 className="heading-h2 text-white">Analizza il Tuo Investimento</h2>
-                                        <p className="body mt-2 max-w-sm text-slate-400">
-                                            Inserisci i parametri del tuo investimento e clicca "Analizza" per vedere le proiezioni di crescita.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
+                        {/* Results */}
+                        <div className="lg:col-span-2">
+                            {results ? (
+                                <InvestmentResults 
+                                    results={results} 
+                                    timeHorizon={inputs.timeHorizonYears} 
+                                />
+                            ) : (
+                                <div className="flex flex-col justify-center items-center h-96 bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 text-center border-2 border-dashed border-slate-700">
+                                    <TrendingUpIcon className="w-16 h-16 text-cyan-500/50 mb-4" />
+                                    <h2 className="heading-h2 text-white">Analizza il Tuo Investimento</h2>
+                                    <p className="body mt-2 max-w-sm text-slate-400">
+                                        Inserisci i parametri del tuo investimento e clicca "Analizza" per vedere le proiezioni di crescita.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </main>
                 </div>

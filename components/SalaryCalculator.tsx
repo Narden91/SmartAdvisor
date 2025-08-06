@@ -233,7 +233,7 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
                             {results ? (
                                <SalaryResults results={results} />
                             ) : (
-                               <div className="flex flex-col justify-center items-center h-full min-h-[400px] bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 text-center border-2 border-dashed border-slate-700">
+                               <div className="flex flex-col justify-center items-center h-96 bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 text-center border-2 border-dashed border-slate-700">
                                     <SparklesIcon className="w-16 h-16 text-cyan-500/50 mb-4" />
                                     <h2 className="heading-h2 text-white">Il tuo stipendio, in chiaro</h2>
                                     <p className="body mt-2 max-w-sm text-slate-400">Inserisci i dati nel modulo per scoprire il tuo stipendio netto mensile e annuale.</p>
