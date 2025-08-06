@@ -1,7 +1,8 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 import { AllLoanInputs, FinancialAdvice, FinancialProduct, LoanCalculations, PortfolioItem } from '../types';
-import { isDomainAllowed } from '../security.config';
+import { isDomainAllowed, sanitizeInput } from '../security.config';
+import RateLimitService from './rateLimitService';
 
 // Get API key from environment variables (supports both development and production)
 const apiKey = process.env.VITE_GEMINI_API_KEY;
@@ -17,6 +18,56 @@ if (!isDomainAllowed(GEMINI_API_DOMAIN)) {
 }
 
 const ai = new GoogleGenAI({ apiKey });
+
+// Initialize rate limiting service
+const rateLimitService = RateLimitService.getInstance();
+
+// Enhanced error handling with retry logic
+class APIError extends Error {
+    constructor(
+        message: string,
+        public statusCode?: number,
+        public retryAfter?: number,
+        public isRateLimited?: boolean
+    ) {
+        super(message);
+        this.name = 'APIError';
+    }
+}
+
+// Request retry utility with exponential backoff
+const retryWithBackoff = async <T>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3,
+    baseDelay: number = 1000
+): Promise<T> => {
+    let lastError: Error;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            return await operation();
+        } catch (error) {
+            lastError = error as Error;
+            
+            // Don't retry rate limit errors or client errors
+            if (error instanceof APIError && (error.isRateLimited || (error.statusCode && error.statusCode >= 400 && error.statusCode < 500))) {
+                throw error;
+            }
+            
+            if (attempt === maxRetries) {
+                rateLimitService.recordFailure();
+                throw lastError;
+            }
+            
+            // Exponential backoff with jitter
+            const delay = Math.min(baseDelay * Math.pow(2, attempt) + Math.random() * 1000, 30000);
+            console.warn(`[GeminiService] Attempt ${attempt + 1} failed, retrying in ${delay}ms:`, error.message);
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+    
+    throw lastError!;
+};
 
 const responseSchema = {
     type: Type.OBJECT,
@@ -57,10 +108,32 @@ const formatPortfolioForPrompt = (portfolio: PortfolioItem[]): string => {
     if (portfolio.length === 0) {
         return "Nessun investimento nel portafoglio.";
     }
-    return portfolio.map(item => `- ${item.name}: ${parseFloat(item.amount) || 0} EUR (Rendimento annuo atteso: ${parseFloat(item.returnRate) || 0}%)`).join('\n');
+    return portfolio.map(item => {
+        // Sanitize portfolio item names to prevent injection
+        const safeName = sanitizeInput(item.name);
+        const amount = parseFloat(item.amount) || 0;
+        const returnRate = parseFloat(item.returnRate) || 0;
+        return `- ${safeName}: ${amount} EUR (Rendimento annuo atteso: ${returnRate}%)`;
+    }).join('\n');
 }
 
 export const getFinancialAdvice = async (inputs: AllLoanInputs, product: FinancialProduct, calculations: LoanCalculations): Promise<FinancialAdvice> => {
+    // Estimate request size for rate limiting
+    const requestSize = JSON.stringify({ inputs, product, calculations }).length;
+    
+    // Check rate limits before making API call
+    const rateLimitCheck = await rateLimitService.checkRateLimit(requestSize, 'gemini-api');
+    
+    if (!rateLimitCheck.allowed) {
+        const error = new APIError(
+            rateLimitCheck.reason || 'Rate limit exceeded',
+            429,
+            rateLimitCheck.retryAfter,
+            true
+        );
+        throw error;
+    }
+
     const { capitale, durataMesi, liquidSavings, portfolio } = inputs;
 
     // Calculate total investments and weighted average return
@@ -108,14 +181,20 @@ export const getFinancialAdvice = async (inputs: AllLoanInputs, product: Financi
     `;
 
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: responseSchema,
-                temperature: 0.3,
-            },
+        const response = await retryWithBackoff(async () => {
+            const result = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: prompt,
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: responseSchema,
+                    temperature: 0.3,
+                },
+            });
+            
+            // Record successful API call
+            rateLimitService.recordFailure(); // Reset failure count on success
+            return result;
         });
 
         const jsonText = response.text?.trim();
@@ -132,11 +211,37 @@ export const getFinancialAdvice = async (inputs: AllLoanInputs, product: Financi
         return parsedResponse as FinancialAdvice;
 
     } catch (error) {
+        // Record API failure for circuit breaker
+        rateLimitService.recordFailure();
+        
+        if (error instanceof APIError) {
+            // Re-throw API errors with rate limit information
+            throw error;
+        }
+        
         if (error instanceof SyntaxError) {
             // Catches JSON.parse errors
-            throw new Error("Il modello AI ha restituito una risposta malformata. Impossibile analizzare i dati.");
+            throw new APIError("Il modello AI ha restituito una risposta malformata. Impossibile analizzare i dati.", 422);
         }
+        
         // For other errors (API connection, etc.)
-        throw new Error("Non è stato possibile contattare il servizio di consulenza AI. Controlla la tua connessione e riprova.");
+        const message = error instanceof Error ? error.message : "Errore sconosciuto";
+        
+        // Check if it's a rate limit error from the API
+        if (message.includes('quota') || message.includes('rate') || message.includes('limit')) {
+            throw new APIError("Limite di richieste API raggiunto. Riprova tra qualche minuto.", 429, 300, true);
+        }
+        
+        // Check for network/connectivity issues
+        if (message.includes('network') || message.includes('fetch') || message.includes('connection')) {
+            throw new APIError("Problemi di connessione. Verifica la tua connessione internet e riprova.", 503);
+        }
+        
+        // Check for authentication issues
+        if (message.includes('auth') || message.includes('permission') || message.includes('unauthorized')) {
+            throw new APIError("Problema di autenticazione con il servizio AI. Contatta il supporto tecnico.", 401);
+        }
+        
+        throw new APIError("Non è stato possibile contattare il servizio di consulenza AI. Controlla la tua connessione e riprova.", 503);
     }
 };

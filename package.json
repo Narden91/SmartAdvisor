@@ -1,7 +1,7 @@
 {
   "name": "smart-loan-advisor",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.2.1",
   "type": "module",
   "homepage": "https://Narden91.github.io/SmartAdvisor",
   "scripts": {

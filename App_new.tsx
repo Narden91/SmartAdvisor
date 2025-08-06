@@ -7,7 +7,6 @@ import InvestmentAnalysis from './components/InvestmentAnalysis';
 import Footer from './components/Footer';
 import CookieBanner from './components/CookieBanner';
 import NavBar from './components/NavBar';
-import RateLimitStatus from './components/RateLimitStatus';
 
 const App: React.FC = () => {
   const {
@@ -72,7 +71,6 @@ const App: React.FC = () => {
       />
       
       <CookieBanner />
-      <RateLimitStatus />
     </div>
   );
 };
