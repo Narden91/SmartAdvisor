@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { LogoIcon, CalculatorIcon, WalletIcon, TrendingUpIcon } from './icons';
-import Footer from './Footer';
 
 interface HomePageProps {
     onNavigateToLoanCalculator: () => void;
@@ -82,13 +81,6 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToLoanCalculator, onNavig
                     </div>
                 </div>
             </section>
-
-            {/* Footer */}
-            <Footer 
-                onNavigateToLoanCalculator={onNavigateToLoanCalculator}
-                onNavigateToSalaryCalculator={onNavigateToSalaryCalculator}
-                onNavigateToInvestmentAnalysis={onNavigateToInvestmentAnalysis}
-            />
         </div>
     );
 };

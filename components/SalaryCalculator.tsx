@@ -3,7 +3,6 @@ import { SalaryCalculatorInputs, ContractType, SalaryCalculationResults } from '
 import { calculateNetSalary } from '../services/salaryService';
 import { WalletIcon, HomeIcon, SparklesIcon } from './icons';
 import SalaryResults from './SalaryResults';
-import Footer from './Footer';
 
 const initialSalaryInputs: SalaryCalculatorInputs = {
     ral: '30000',
@@ -243,13 +242,6 @@ const SalaryCalculator: React.FC<SalaryCalculatorProps> = ({ onBack, onNavigateT
                     </main>
                 </div>
             </section>
-
-            {/* Footer */}
-            <Footer 
-                onNavigateToLoanCalculator={onNavigateToLoanCalculator}
-                onNavigateToSalaryCalculator={() => {/* Already on salary calculator */}}
-                onNavigateToHome={onBack}
-            />
         </div>
     );
 };
